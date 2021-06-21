@@ -27,9 +27,7 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "build_lib": "ng build cron-editor",
-    "build": "ng build cron-editor && ng build --prod",
-    "start": "yarn run build_lib && ng serve"
+    "build": "ng build quartz-cron-editor && ng build --prod"
   },
   "private": false,
   "dependencies": {
