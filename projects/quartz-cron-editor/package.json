@@ -2,22 +2,25 @@
   "name": "quartz-cron-editor",
   "version": "1.0.0",
   "description": "A Quartz Cron Editor Used to Generate Cron Expression which supports for Angular Application",
+  "main": "karma.conf.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kishorenakonda/quartz-cron-editor.git"
+  },
   "keywords": [
     "cron",
+    "angular",
     "quartz",
-    "expression",
+    "cron-expression",
     "schedular"
   ],
-  "author": {
-    "name": "Kishore Kumar",
-    "email": "kk78744@gmail.com"
-  },
+  "author": "Kishore Kumar",
   "license": "MIT",
-  "peerDependencies": {
-    "@angular/common": "~7.1.1",
-    "@angular/core": "^7.1.1"
-  }
+  "bugs": {
+    "url": "https://github.com/kishorenakonda/quartz-cron-editor/issues"
+  },
+  "homepage": "https://github.com/kishorenakonda/quartz-cron-editor#readme"
 }
