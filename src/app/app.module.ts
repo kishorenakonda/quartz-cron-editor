@@ -4,8 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
 import { AppComponent } from './app.component';
-import { QuartzCronEditorModule } from 'projects/quartz-cron-editor/src/lib/quartz-cron-editor.module';
-// import { QuartzCronEditorModule } from 'quartz-cron-editor';
+// import { QuartzCronEditorModule } from 'projects/quartz-cron-editor/src/lib/quartz-cron-editor.module';
+import { QuartzCronEditorModule } from 'quartz-cron-editor';
 
 @NgModule({
   declarations: [AppComponent],
