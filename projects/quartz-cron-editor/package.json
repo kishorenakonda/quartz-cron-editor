@@ -1,8 +1,7 @@
 {
-  "name": "cron-quartz-editor",
+  "name": "quartz-cron-editor",
   "version": "1.0.0",
   "description": "A Quartz Cron Editor Used to Generate Cron Expression which supports for Angular Application",
-  "main": "karma.conf.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
