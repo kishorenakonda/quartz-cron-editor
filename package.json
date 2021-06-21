@@ -1,5 +1,5 @@
 {
-  "name": "quartz-cron-editor-app",
+  "name": "quartz-cron-editor",
   "description": "A Quartz Cron expression generator to be used in Angular applications",
   "author": {
     "name": "Kishore Kumar",
