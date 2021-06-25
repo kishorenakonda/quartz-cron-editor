@@ -51,7 +51,12 @@
   </div>
 
   <div class="col-md-10">
-    <quartz-cron-editor [(cron)]="cronExpression" [disabled]="isCronDisabled" [(options)]="cronOptions">
+    <quartz-cron-editor [(cron)]="cronExpression" [disabled]="isCronDisabled" [(options)]="cronOptions"
+      (tabChange)="onTabChange($event)">
     </quartz-cron-editor>
+  </div>
+
+  <div class="col-md-10" style="margin-top: 20px">
+    Resulting Data Object : {{dataObj | json}}
   </div>
 </div>

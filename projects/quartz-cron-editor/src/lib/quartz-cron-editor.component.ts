@@ -13,17 +13,16 @@ export class QuartzCronEditorComponent implements OnInit, OnChanges {
   @Input() public disabled: boolean;
   @Input() public options: CronOptions;
 
-  @Input() get cron(): string { return this.localCron; }
+  @Output() cronChange = new EventEmitter();
+  @Output() tabChange = new EventEmitter();
 
+  @Input() get cron(): string { return this.localCron; }
   set cron(value: string) {
     this.localCron = value;
     if (this.isValidExpression) {
       this.cronChange.emit(this.localCron);
     }
   }
-
-  // the name is an Angular convention, @Input variable name + "Change" suffix
-  @Output() cronChange = new EventEmitter();
 
   public activeTab: string;
   public selectOptions = this.getSelectOptions();
@@ -48,6 +47,7 @@ export class QuartzCronEditorComponent implements OnInit, OnChanges {
     const newCron = changes['cron'];
     if (newCron && !newCron.firstChange) {
       this.handleModelChange(this.cron);
+      this.getTabEmitObj(this.activeTab);
     }
   }
 
@@ -56,6 +56,15 @@ export class QuartzCronEditorComponent implements OnInit, OnChanges {
       this.activeTab = tab;
       this.regenerateCron();
     }
+  }
+
+  public getTabEmitObj(tab) {
+    const tabEmitObj = {
+      schedularType: (tab && tab.toLowerCase() === 'onetime') ? 'onetime' : 'recurring',
+      activeTab: tab,
+      cron: this.cron
+    };
+    this.tabChange.emit(tabEmitObj);
   }
 
   public dayDisplay(day: string): string {
@@ -114,9 +123,8 @@ export class QuartzCronEditorComponent implements OnInit, OnChanges {
         throw new Error('Invalid cron active tab selection');
     }
 
-    if (this.activeTab && this.activeTab.toLowerCase() !== 'onetime') {
-      this.isValidExpression = this.onValidateQuartzExpression(this.cron);
-    }
+    this.isValidExpression = (this.activeTab && this.activeTab.toLowerCase() === 'onetime')
+      ? true : this.onValidateQuartzExpression(this.cron);
   }
 
   private generateOneTimeCron() {
@@ -125,13 +133,21 @@ export class QuartzCronEditorComponent implements OnInit, OnChanges {
     const month = selectedDateTime.getMonth() + 1;
     const hour = selectedDateTime.getHours();
     const minutes = selectedDateTime.getMinutes();
+    const seconds = selectedDateTime.getSeconds();
+
     const parsedMonth = (month <= 9) ? '0' + month : month.toString();
     const parsedDate = (date <= 9) ? '0' + date : date.toString();
     const parsedHour = (hour <= 9) ? '0' + hour : hour.toString();
     const parsedMinutes = (minutes <= 9) ? '0' + minutes : minutes.toString();
+    const parsedSeconds = (seconds <= 9) ? '0' + seconds : seconds.toString();
 
-    this.cron = parsedMinutes + ' ' + parsedHour + ' ' + parsedDate
-      + ' ' + parsedMonth + ' ? ' + selectedDateTime.getFullYear();
+    if (!this.options.removeSeconds) {
+      this.cron = parsedMinutes + ' ' + parsedHour + ' ' + parsedDate
+        + ' ' + parsedMonth + ' ? ' + selectedDateTime.getFullYear();
+    } else {
+      this.cron = parsedSeconds + ' ' + parsedMinutes + ' ' + parsedHour + ' ' + parsedDate
+        + ' ' + parsedMonth + ' ? ' + selectedDateTime.getFullYear();
+    }
   }
 
   private generateMinutesCron() {
@@ -407,6 +423,8 @@ export class QuartzCronEditorComponent implements OnInit, OnChanges {
       this.activeTab = 'advanced';
       this.state.advanced.expression = cron;
     }
+
+    this.getTabEmitObj(this.activeTab);
   }
 
   private setValuesForMonthlySpecificDays(seconds, minutes, hours, dayOfMonth, month) {
@@ -450,8 +468,8 @@ export class QuartzCronEditorComponent implements OnInit, OnChanges {
     }
 
     if (cronParts.length !== expected) {
-      this.state.validation.errorMessage = `Invalid cron expression, there must be ${expected} segments`;
-      return;
+      // this.state.validation.errorMessage = `Invalid cron expression, there must be ${expected} segments`;
+      // return;
     }
 
     this.state.validation.isValid = true;
@@ -625,7 +643,7 @@ export class QuartzCronEditorComponent implements OnInit, OnChanges {
   }
 
   onValidateQuartzExpression(expression) {
-    const QUARTZ_REGEX = /^\s*($|#|\w+\s*=|(\?|\*|(?:[0-5]?\d)(?:(?:-|\/|\,)(?:[0-5]?\d))?(?:,(?:[0-5]?\d)(?:(?:-|\/|\,)(?:[0-5]?\d))?)*)\s+(\?|\*|(?:[0-5]?\d)(?:(?:-|\/|\,)(?:[0-5]?\d))?(?:,(?:[0-5]?\d)(?:(?:-|\/|\,)(?:[0-5]?\d))?)*)\s+(\?|\*|(?:[01]?\d|2[0-3])(?:(?:-|\/|\,)(?:[01]?\d|2[0-3]))?(?:,(?:[01]?\d|2[0-3])(?:(?:-|\/|\,)(?:[01]?\d|2[0-3]))?)*)\s+(\?|\*|(?:0?[1-9]|[12]\d|3[01])(?:(?:-|\/|\,)(?:0?[1-9]|[12]\d|3[01]))?(?:,(?:0?[1-9]|[12]\d|3[01])(?:(?:-|\/|\,)(?:0?[1-9]|[12]\d|3[01]))?)*)\s+(\?|\*|(?:[1-9]|1[012])(?:(?:-|\/|\,)(?:[1-9]|1[012]))?(?:L|W)?(?:,(?:[1-9]|1[012])(?:(?:-|\/|\,)(?:[1-9]|1[012]))?(?:L|W)?)*|\?|\*|(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)(?:(?:-)(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC))?(?:,(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)(?:(?:-)(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC))?)*)\s+(\?|\*|(?:[1-7]|MON|TUE|WED|THU|FRI|SAT|SUN)(?:(?:-|\/|\,|#)(?:[1-5]))?(?:L)?(?:,(?:[1-7]|MON|TUE|WED|THU|FRI|SAT|SUN)(?:(?:-|\/|\,|#)(?:[1-5]))?(?:L)?)*|\?|\*|(?:MON|TUE|WED|THU|FRI|SAT|SUN)(?:(?:-)(?:MON|TUE|WED|THU|FRI|SAT|SUN))?(?:,(?:MON|TUE|WED|THU|FRI|SAT|SUN)(?:(?:-)(?:MON|TUE|WED|THU|FRI|SAT|SUN))?)*)(|\s)+(\?|\*|(?:|\d{4})(?:(?:-|\/|\,)(?:|\d{4}))?(?:,(?:|\d{4})(?:(?:-|\/|\,)(?:|\d{4}))?)*))$/;
+    const QUARTZ_REGEX = /^\s*($|#|\w+\s*=|(\?|\*|(?:[0-5]?\d)(?:(?:-|\/|\,)(?:[0-5]?\d))?(?:,(?:[0-5]?\d)(?:(?:-|\/|\,)(?:[0-5]?\d))?)*)\s+(\?|\*|(?:[0-5]?\d)(?:(?:-|\/|\,)(?:[0-5]?\d))?(?:,(?:[0-5]?\d)(?:(?:-|\/|\,)(?:[0-5]?\d))?)*)\s+(\?|\*|(?:[01]?\d|2[0-3])(?:(?:-|\/|\,)(?:[01]?\d|2[0-3]))?(?:,(?:[01]?\d|2[0-3])(?:(?:-|\/|\,)(?:[01]?\d|2[0-3]))?)*)\s+(\?|\*|(?:0?[1-9]|[12]\d|3[01])(?:(?:-|\/|\,)(?:0?[1-9]|[12]\d|3[01]))?(?:,(?:0?[1-9]|[12]\d|3[01])(?:(?:-|\/|\,)(?:0?[1-9]|[12]\d|3[01]))?)*)\s+(\?|\*|(?:0?[1-9]|1[012])(?:(?:-|\/|\,)(?:0?[1-9]|1[012]))?(?:L|W)?(?:,(?:0?[1-9]|1[012])(?:(?:-|\/|\,)(?:0?[1-9]|1[012]))?(?:L|W)?)*|\?|\*|(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)(?:(?:-)(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC))?(?:,(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)(?:(?:-)(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC))?)*)\s+(\?|\*|(?:[1-7]|MON|TUE|WED|THU|FRI|SAT|SUN)(?:(?:-|\/|\,|#)(?:[1-5]))?(?:L)?(?:,(?:[1-7]|MON|TUE|WED|THU|FRI|SAT|SUN)(?:(?:-|\/|\,|#)(?:[1-5]))?(?:L)?)*|\?|\*|(?:MON|TUE|WED|THU|FRI|SAT|SUN)(?:(?:-)(?:MON|TUE|WED|THU|FRI|SAT|SUN))?(?:,(?:MON|TUE|WED|THU|FRI|SAT|SUN)(?:(?:-)(?:MON|TUE|WED|THU|FRI|SAT|SUN))?)*)(|\s)+(\?|\*|(?:|\d{4})(?:(?:-|\/|\,)(?:|\d{4}))?(?:,(?:|\d{4})(?:(?:-|\/|\,)(?:|\d{4}))?)*))$/;
 
     if (!expression) {
       return false;

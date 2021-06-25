@@ -9,6 +9,7 @@ import { CronOptions } from 'projects/quartz-cron-editor/src/lib/CronOptions';
 export class AppComponent {
   // Hangfire 1.7+ compatible expression: '3 2 12 1/1 ?'
   // Quartz compatible expression: '4 3 2 12 1/1 ? *'
+  public dataObj: any;
   public cronExpression = '0 12 1W 1/1 ?';
   public isCronDisabled = false;
   public cronOptions: CronOptions = {
@@ -29,8 +30,12 @@ export class AppComponent {
     hideYearlyTab: false,
     hideAdvancedTab: false,
 
-    hideSeconds: true,
-    removeSeconds: true,
+    hideSeconds: false,
+    removeSeconds: false,
     removeYears: true
   };
+
+  onTabChange(tabEvent) {
+    this.dataObj = tabEvent;
+  }
 }
